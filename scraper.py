@@ -15,7 +15,22 @@ def extract_next_links(url, resp):
     #         resp.raw_response.url: the url, again
     #         resp.raw_response.content: the content of the page!
     # Return a list with the hyperlinks (as strings) scrapped from resp.raw_response.content
-    return list()
+
+    from bs4 import BeautifulSoup
+    from urllib.parse import urljoin, urldefrag
+
+    if resp.status != 200 or resp.raw_response is None:
+        return []
+    
+    soup = BeautifulSoup(resp.raw_response.content, 'lxml')
+    links = set()
+
+    for tag in soup.find_all('a', href = True):
+        href = tag['href']
+        abs_href = urljoin(url, href)
+        clean_href = urldefrag(abs_href)[0]
+        links.add(clean_href)
+    return list(links)
 
 def is_valid(url):
     # Decide whether to crawl this url or not. 
