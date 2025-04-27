@@ -3,6 +3,8 @@ from urllib.parse import urlparse
 
 def scraper(url, resp):
     links = extract_next_links(url, resp)
+    #print("there" + url)
+    print (is_valid(url))
     return [link for link in links if is_valid(link)]
 
 def extract_next_links(url, resp):
@@ -40,6 +42,7 @@ def is_valid(url):
         parsed = urlparse(url)
         if parsed.scheme not in set(["http", "https"]):
             return False
+        
 
         allowed = {
             "www.ics.uci.edu",
