@@ -2,9 +2,13 @@ import re
 from urllib.parse import urlparse
 
 def scraper(url, resp):
+    if resp.status != 200:
+        return []
+
+    if resp.raw_response is None:
+        return []
+
     links = extract_next_links(url, resp)
-    #print("there" + url)
-    print (is_valid(url))
     return [link for link in links if is_valid(link)]
 
 def extract_next_links(url, resp):
@@ -21,16 +25,14 @@ def extract_next_links(url, resp):
     from bs4 import BeautifulSoup
     from urllib.parse import urljoin, urldefrag
 
-    if resp.status != 200 or resp.raw_response is None:
-        return []
-    
-    soup = BeautifulSoup(resp.raw_response.content, 'lxml')
+    soup = BeautifulSoup(resp.raw_response.content, 'html.parser')
+
     links = set()
 
-    for tag in soup.find_all('a', href = True):
+    for tag in soup.find_all('a', href=True):
         href = tag['href']
         abs_href = urljoin(url, href)
-        clean_href = urldefrag(abs_href)[0]
+        clean_href = urldefrag(abs_href)[0] 
         links.add(clean_href)
     return list(links)
 
@@ -60,7 +62,7 @@ def is_valid(url):
             return False
 
         return not re.match(
-            r".*\.(css|js|bmp|gif|jpe?g|ico"
+            r".*\.(css|js|bmp|gif|jpe?g|ico|img"
             + r"|png|tiff?|mid|mp2|mp3|mp4"
             + r"|wav|avi|mov|mpeg|ram|m4v|mkv|ogg|ogv|pdf"
             + r"|ps|eps|tex|ppt|pptx|doc|docx|xls|xlsx|names"
