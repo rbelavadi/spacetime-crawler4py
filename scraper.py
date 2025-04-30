@@ -1,5 +1,8 @@
 import re
 from urllib.parse import urlparse
+import PartA
+import json
+from collections import Counter
 
 def scraper(url, resp):
     if resp.status != 200:
@@ -26,9 +29,24 @@ def extract_next_links(url, resp):
     from urllib.parse import urljoin, urldefrag
 
     soup = BeautifulSoup(resp.raw_response.content, 'html.parser')
-
     links = set()
-
+    
+    text = soup.get_text(separator = " ", strip=True) # Gets all text
+    tokens = PartA.tokenize(text) # Tokenize text into words (including ')
+    wordDict = PartA.computeWordFrequencies(tokens) # Compute word frequencies of all tokens
+    
+    # Load dictionary from file, update dictionary
+    with open("saved_words.json", "r") as file: 
+        prev = json.load(file)
+        # prev = Counter(prev) + Counter(wordDict) # Add dictionaries together
+        prev = merge_dict(prev, wordDict)
+        prev = dict(prev)
+    
+    # Store dictionary in json file
+    file = open("saved_words.json", "w")
+    json.dump(prev, file)
+    file.close()
+    
     for tag in soup.find_all('a', href=True):
         href = tag['href']
         abs_href = urljoin(url, href)
@@ -36,6 +54,11 @@ def extract_next_links(url, resp):
         links.add(clean_href)
     return list(links)
 
+def merge_dict(dict1, dict2):
+    new = Counter(dict1) + Counter(dict2)
+    sorted_d = dict(sorted(new.items(), key=lambda item: item[1], reverse=True))
+    return sorted_d
+    
 def is_valid(url):
     # Decide whether to crawl this url or not. 
     # If you decide to crawl it, return True; otherwise return False.
