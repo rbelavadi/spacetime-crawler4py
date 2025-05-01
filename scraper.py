@@ -2,9 +2,12 @@ import re
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin, urldefrag
+import json
+import os
+import PartA
 
 def scraper(url, resp):
-    init_json()
+    init_jsonl()
     if resp.status != 200:
         return []
 
@@ -17,17 +20,17 @@ def scraper(url, resp):
     links = extract_next_links(url, resp)
     return [link for link in links if is_valid(link)]
 
-# Initializes json file
-def init_json():
-    if os.path.isfile("saved_words.json"):
+# Initializes jsonl file (FIRST LINE OF JSONL FILE IS WORTHLESS)
+def init_jsonl():
+    if os.path.isfile("saved_words.jsonl"):
         return
     data = {
-        "largest": ['none.com', 0],
-        "words": {}
+        "url": 'none.com',
+        "tokens": [],
     }
-    # Write to JSON file
-    with open("saved_words.json", "w") as f:
-        json.dump(data, f, indent=4)
+    # Write to JSONL file
+    with open("saved_words.jsonl", "w") as f:
+        f.write(json.dumps(data) + "\n")
 
 def extract_next_links(url, resp):
     # Implementation required.
@@ -45,24 +48,15 @@ def extract_next_links(url, resp):
     
     text = soup.get_text(separator = " ", strip=True) # Gets all text
     tokens = PartA.tokenize(text) # Tokenize text into words (including ')
-    wordDict = PartA.computeWordFrequencies(tokens) # Compute word frequencies of all tokens
     
-    # Load dictionary from file, update dictionary
-    with open("saved_words.json", "r") as file: 
-        prev = json.load(file)
-        largest = prev['largest'][1]
-        numwords = len(tokens)
-        if largest < numwords:
-            prev['largest'] = [resp.url, numwords]
-        # prev = Counter(prev) + Counter(wordDict) # Add dictionaries together
-        merged = merge_dict(prev['words'], wordDict)
-        prev['words'] = dict(merged)
-    
-    # Store dictionary in json file
-    file = open("saved_words.json", "w")
-    json.dump(prev, file)
-    file.close()
-    
+    data = {
+        "url": resp.url,
+        "tokens": tokens,
+    }
+    # Store dictionary in json lines file
+    with open("saved_words.jsonl", "a") as file:
+        file.write(json.dumps(data) + "\n")
+
     for tag in soup.find_all('a', href=True):
         href = tag['href']
         abs_href = urljoin(url, href)
@@ -70,10 +64,10 @@ def extract_next_links(url, resp):
         links.add(clean_href)
     return list(links)
 
-def merge_dict(dict1, dict2):
-    new = Counter(dict1) + Counter(dict2)
-    sorted_d = dict(sorted(new.items(), key=lambda item: item[1], reverse=True))
-    return sorted_d
+# def merge_dict(dict1, dict2):
+#     new = Counter(dict1) + Counter(dict2)
+#     sorted_d = dict(sorted(new.items(), key=lambda item: item[1], reverse=True))
+#     return sorted_d
     
 def is_valid(url):
     # Decide whether to crawl this url or not. 
