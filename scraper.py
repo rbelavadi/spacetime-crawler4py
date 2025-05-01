@@ -1,9 +1,7 @@
 import re
 from urllib.parse import urlparse
-import PartA
-import json
-from collections import Counter
-import os
+from bs4 import BeautifulSoup
+from urllib.parse import urljoin, urldefrag
 
 def scraper(url, resp):
     init_json()
@@ -11,6 +9,9 @@ def scraper(url, resp):
         return []
 
     if resp.raw_response is None:
+        return []
+    
+    if is_low_info(resp.raw_response.content):
         return []
 
     links = extract_next_links(url, resp)
@@ -38,9 +39,6 @@ def extract_next_links(url, resp):
     #         resp.raw_response.url: the url, again
     #         resp.raw_response.content: the content of the page!
     # Return a list with the hyperlinks (as strings) scrapped from resp.raw_response.content
-
-    from bs4 import BeautifulSoup
-    from urllib.parse import urljoin, urldefrag
 
     soup = BeautifulSoup(resp.raw_response.content, 'html.parser')
     links = set()
@@ -102,9 +100,27 @@ def is_valid(url):
         if domain == "today.uci.edu" and not parsed.path.startswith("/department/information_computer_sciences/"):
             return False
 
+        lower_query = parsed.query.lower()
+        trap_keywords = ["sessionid=", "sort=", "tab_files=", "do=media", "do=diff", "eventdate=", "tribe-bar-date=",
+        "do=edit", "rev=", "idx=", "ical=", "outlook-ical=", "view=", "action=", "controller="]
+
+        lower_path = parsed.path.lower()
+        if any(keyword in lower_query or keyword in lower_path for keyword in trap_keywords):
+            return False
+        
+        if "/day/" in lower_path and re.search(r"\d{4}-\d{2}-\d{2}", lower_path):
+            return False
+        
+        if re.search(r"/\d{4}-\d{2}$", parsed.path):
+            return False
+
+        if "events/list/page" in parsed.path and parsed.query:
+            return False
+
+
         return not re.match(
             r".*\.(css|js|bmp|gif|jpe?g|ico"
-            + r"|png|tiff?|mid|mp2|mp3|mp4|img"
+            + r"|png|tiff?|mid|mp2|mp3|mp4|mpg|mpeg|img"
             + r"|wav|avi|mov|mpeg|ram|m4v|mkv|ogg|ogv|pdf"
             + r"|ps|eps|tex|ppt|pptx|doc|docx|xls|xlsx|names"
             + r"|data|dat|exe|bz2|tar|msi|bin|7z|psd|dmg|iso|apk|war"
@@ -115,3 +131,20 @@ def is_valid(url):
     except TypeError:
         print("TypeError for", url)
         return False
+
+def is_low_info(html):
+    soup = BeautifulSoup(html, 'html.parser')
+    for tag in soup(["script", "style", "meta", "noscript", "header", "footer"]):
+        tag.decompose()
+
+    text = soup.get_text(separator=' ')
+    words = re.findall(r'\b\w+\b', text.lower())
+    unique_words = set(words)
+    link_count = len(soup.find_all('a'))
+    total_text_len = len(words)
+
+    if total_text_len < 25 or len(unique_words) < 10:
+        return True
+    if link_count > 200 and total_text_len / (link_count + 1) < 1.5:
+        return True
+    return False
