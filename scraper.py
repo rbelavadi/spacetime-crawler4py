@@ -3,8 +3,10 @@ from urllib.parse import urlparse
 import PartA
 import json
 from collections import Counter
+import os
 
 def scraper(url, resp):
+    init_json()
     if resp.status != 200:
         return []
 
@@ -13,6 +15,18 @@ def scraper(url, resp):
 
     links = extract_next_links(url, resp)
     return [link for link in links if is_valid(link)]
+
+# Initializes json file
+def init_json():
+    if os.path.isfile("saved_words.json"):
+        return
+    data = {
+        "largest": ['none.com', 0],
+        "words": {}
+    }
+    # Write to JSON file
+    with open("saved_words.json", "w") as f:
+        json.dump(data, f, indent=4)
 
 def extract_next_links(url, resp):
     # Implementation required.
@@ -38,9 +52,13 @@ def extract_next_links(url, resp):
     # Load dictionary from file, update dictionary
     with open("saved_words.json", "r") as file: 
         prev = json.load(file)
+        largest = prev['largest'][1]
+        numwords = len(tokens)
+        if largest < numwords:
+            prev['largest'] = [resp.url, numwords]
         # prev = Counter(prev) + Counter(wordDict) # Add dictionaries together
-        prev = merge_dict(prev, wordDict)
-        prev = dict(prev)
+        merged = merge_dict(prev['words'], wordDict)
+        prev['words'] = dict(merged)
     
     # Store dictionary in json file
     file = open("saved_words.json", "w")
@@ -85,13 +103,8 @@ def is_valid(url):
             return False
 
         return not re.match(
-<<<<<<< Updated upstream
-            r".*\.(css|js|bmp|gif|jpe?g|ico|img"
-            + r"|png|tiff?|mid|mp2|mp3|mp4"
-=======
             r".*\.(css|js|bmp|gif|jpe?g|ico"
             + r"|png|tiff?|mid|mp2|mp3|mp4|img"
->>>>>>> Stashed changes
             + r"|wav|avi|mov|mpeg|ram|m4v|mkv|ogg|ogv|pdf"
             + r"|ps|eps|tex|ppt|pptx|doc|docx|xls|xlsx|names"
             + r"|data|dat|exe|bz2|tar|msi|bin|7z|psd|dmg|iso|apk|war"
