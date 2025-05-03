@@ -21,7 +21,10 @@ def tokenize(text):
 def token_gen(text):
     word_chars = []
     for char in text:
-        c = char.lower()
+        if char.isalpha():
+            c = char.lower()
+        else:
+            c = char
         if c in alnumset:
             word_chars.append(c)
         else:
