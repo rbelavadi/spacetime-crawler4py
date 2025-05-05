@@ -11,7 +11,7 @@ def get_stopwords():
     while word:
         stopwords.add(word.strip().lower())
         word = file.readline()
-get_stopwords()
+# get_stopwords()
     
 # O(n) time complexity, O(m) space complexity. n = number of characters, m = number of tokens
 def tokenize(text):
