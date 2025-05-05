@@ -111,6 +111,14 @@ def is_valid(url):
         if "events/list/page" in parsed.path and parsed.query:
             return False
 
+        # Will cause infinite crawling through the full commit history
+        if "gitlab.ics.uci.edu" in parsed.netloc and (
+            "/-/commit/" in parsed.path or 
+            "/-/compare" in parsed.path or 
+            "/-/tree/" in parsed.path
+        ):
+            return False
+
 
         return not re.match(
             r".*\.(css|js|bmp|gif|jpe?g|ico"
