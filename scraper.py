@@ -5,19 +5,23 @@ from urllib.parse import urljoin, urldefrag
 import json
 import os
 import PartA
+from crawler.worker import mark_url_complete
 
 def scraper(url, resp):
     init_jsonl()
     if resp.status != 200:
+        mark_url_complete(url)
         return []
 
     if resp.raw_response is None:
         return []
     
     if is_low_info(resp.raw_response.content):
+        mark_url_complete(url)
         return []
 
     links = extract_next_links(url, resp)
+    mark_url_complete(url)
     return [link for link in links if is_valid(link)]
 
 # Initializes jsonl file (FIRST LINE OF JSONL FILE IS WORTHLESS)
