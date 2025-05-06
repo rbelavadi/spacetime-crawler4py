@@ -59,9 +59,12 @@ def extract_next_links(url, resp):
 
     for tag in soup.find_all('a', href=True):
         href = tag['href']
-        abs_href = urljoin(url, href)
-        clean_href = urldefrag(abs_href)[0] 
-        links.add(clean_href)
+        try:
+            abs_href = urljoin(url, href)
+            clean_href = urldefrag(abs_href)[0] 
+            links.add(clean_href)
+        except Exception:
+            continue
     return list(links)
 
 # def merge_dict(dict1, dict2):
@@ -102,7 +105,7 @@ def is_valid(url):
         if any(keyword in lower_query or keyword in lower_path for keyword in trap_keywords):
             return False
         
-        if "/day/" in lower_path and re.search(r"\d{4}-\d{2}-\d{2}", lower_path):
+        if "/day/" in lower_path and re.search(r"/\d{4}-\d{2}(/|$)", lower_path):
             return False
         
         if re.search(r"/\d{4}-\d{2}$", parsed.path):
