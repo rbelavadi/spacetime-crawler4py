@@ -112,12 +112,17 @@ def is_valid(url):
             return False
 
         # Will cause infinite crawling through the full commit history
-        if "gitlab.ics.uci.edu" in parsed.netloc and (
-            "/-/commit/" in parsed.path or 
-            "/-/compare" in parsed.path or 
-            "/-/tree/" in parsed.path
-        ):
+        if "gitlab.ics.uci.edu" in parsed.netloc and any(sub in parsed.path for sub in [
+            "/-/commit/",
+            "/-/compare",
+            "/-/tree/",
+            "/-/commits/",
+            "/-/blob/",
+            "/-/raw/",
+            "/-/blame/"
+        ]):
             return False
+
 
 
         return not re.match(
