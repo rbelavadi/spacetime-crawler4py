@@ -114,6 +114,9 @@ def is_valid(url):
 
         if "events/list/page" in parsed.path and parsed.query:
             return False
+        
+        if "/~" in lower_path:
+            return False
 
         # Will cause infinite crawling through the full commit history
         if "gitlab.ics.uci.edu" in parsed.netloc and any(sub in parsed.path for sub in [
