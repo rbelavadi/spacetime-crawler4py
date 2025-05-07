@@ -105,10 +105,11 @@ def is_valid(url):
         if any(keyword in lower_query or keyword in lower_path for keyword in trap_keywords):
             return False
         
-        if "/day/" in lower_path and re.search(r"/\d{4}-\d{2}(/|$)", lower_path):
+        if re.search(r"/\d{4}-\d{2}-\d{2}(/|$)", lower_path):  # Full dates
             return False
-        
-        if re.search(r"/\d{4}-\d{2}$", parsed.path):
+        if re.search(r"/\d{4}-\d{2}(/|$)", lower_path):        # Year-month
+            return False
+        if "/day/" in lower_path or "/week/" in lower_path:    # Day/week views
             return False
 
         if "events/list/page" in parsed.path and parsed.query:
