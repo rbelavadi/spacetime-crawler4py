@@ -1,0 +1,54 @@
+Question1: 14557 unique pages found.
+Question2: http://www.informatics.uci.edu/files/pdf/InformaticsBrochure-March2018 (1186120 words)
+Question3:
+research: 78524
+ics: 68541
+student: 51127
+computer: 42756
+science: 42643
+learning: 39494
+us: 39212
+graduate: 38878
+undergraduate: 37987
+2021: 37903
+uci: 37282
+news: 31611
+informatics: 31526
+2022: 31480
+data: 30351
+events: 30223
+students: 29667
+faculty: 29290
+2020: 26935
+information: 26916
+markellekelly: 26855
+community: 25020
+2023: 23570
+software: 23367
+2018: 22680
+computing: 22334
+alumni: 21896
+2025: 21648
+machine: 20683
+spotlights: 20379
+view: 20290
+projects: 19640
+2019: 19324
+people: 18986
+irvine: 18921
+school: 18466
+will: 17810
+10: 17675
+support: 17431
+2017: 17278
+text: 17030
+april: 16956
+march: 16954
+future: 16383
+systems: 16238
+statistics: 16196
+programs: 16178
+may: 16076
+engineering: 15845
+new: 15778
+Question4: 14556 subdomains found in uci.edu domain.
